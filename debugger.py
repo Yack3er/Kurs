@@ -120,3 +120,51 @@ class SimpleDebugger:
             messagebox.showinfo("Успех", "Файл успешно сохранен.")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось сохранить файл: {e}")
+    def debug_file(self):
+        file_path = self.file_path.get()
+        if not file_path:
+            messagebox.showerror("Ошибка", "Пожалуйста, выберите файл для отладки.")
+            return
+
+        start_line = self.start_line.get()
+        end_line = self.end_line.get()
+
+        if not end_line:
+            messagebox.showerror("Ошибка", "Укажите конечную строку для отладки.")
+            return
+
+        if end_line <= start_line:
+            messagebox.showerror("Ошибка", "Конечная строка должна быть больше начальной строки.")
+            return
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+
+            code_to_debug = "".join(lines[start_line-1:end_line])
+
+            # Перенаправление stdout и stderr
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+            sys.stdout = StringIO()
+            sys.stderr = StringIO()
+
+            tracer = trace.Trace(trace=True, count=False)
+            tracer.run(code_to_debug)
+
+            output = sys.stdout.getvalue()
+            error_output = sys.stderr.getvalue()
+
+            # Восстановление stdout и stderr
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
+            messagebox.showinfo("Отладка", f"Отладка завершена.\nВывод:\n{output}\nОшибки:\n{error_output}")
+        except Exception as e:
+            error_info = traceback.format_exc()
+            messagebox.showerror("Ошибка", f"Произошла ошибка:\n{error_info}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = SimpleDebugger(root)
+    root.mainloop()
