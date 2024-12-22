@@ -104,3 +104,19 @@ class SimpleDebugger:
                 self.code_text.insert(tk.END, f"{i:4}  {line}")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось прочитать файл: {e}")
+    def save_code(self):
+        file_path = self.file_path.get()
+        if not file_path:
+            messagebox.showerror("Ошибка", "Пожалуйста, выберите файл для отладки.")
+            return
+
+        try:
+            code = self.code_text.get(1.0, tk.END)
+            # Удаляем номера строк перед сохранением
+            code_lines = code.splitlines()
+            code_to_save = "\n".join([line[6:] for line in code_lines if line.strip()])
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(code_to_save)
+            messagebox.showinfo("Успех", "Файл успешно сохранен.")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сохранить файл: {e}")
