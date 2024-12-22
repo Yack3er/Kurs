@@ -84,3 +84,23 @@ class SimpleDebugger:
 
         self.start_line_entry.config(bg=entry_bg_color, fg=entry_fg_color)
         self.end_line_entry.config(bg=entry_bg_color, fg=entry_fg_color)
+    def browse_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Python файлы", "*.py")])
+        if file_path:
+            self.file_path.set(file_path)
+            self.show_code()
+
+    def show_code(self):
+        file_path = self.file_path.get()
+        if not file_path:
+            messagebox.showerror("Ошибка", "Пожалуйста, выберите файл для отладки.")
+            return
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            self.code_text.delete(1.0, tk.END)
+            for i, line in enumerate(lines, start=1):
+                self.code_text.insert(tk.END, f"{i:4}  {line}")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось прочитать файл: {e}")
